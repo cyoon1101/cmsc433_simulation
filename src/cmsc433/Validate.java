@@ -1,7 +1,6 @@
 package cmsc433;
 
 import java.util.List;
-import cmsc433.SimulationEvent;
 
 /**
  * Validates a simulation

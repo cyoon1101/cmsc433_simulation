@@ -1,4 +1,4 @@
-package cmsc433;
+package cmsc433; 
 
 /**
  * Machines are used to make different kinds of Food. Each Machine type makes
@@ -33,10 +33,12 @@ public class Machines {
 
 	public final MachineType machineType;
 	public final Food machineFoodType;
-
+	
 	// YOUR CODE GOES HERE...
+	private int machineCapacity; 
+	private int totalCooking; 
 
-
+	// MY CODE 
 
 	/**
 	 * The constructor takes at least the name of the machines, the Food item they
@@ -50,9 +52,10 @@ public class Machines {
 		this.machineFoodType = foodIn;
 
 		// YOUR CODE GOES HERE...
-
-
-
+		this.machineCapacity = countIn; 
+		this.totalCooking = 0; 
+		Simulation.logEvent(SimulationEvent.machinesStarting(this, foodIn, countIn));
+		// MY CODE 
 	}
 
 	/**
@@ -61,21 +64,55 @@ public class Machines {
 	 * parameters or return something other than Object. You will need to implement
 	 * some means to notify the calling Cook when the food item is finished.
 	 */
-	public Object makeFood() throws InterruptedException {
+	public Thread makeFood(Food food) throws InterruptedException {
 		// YOUR CODE GOES HERE...
+		Thread thread = new Thread(new CookAnItem(this, food));
+		thread.start();
+		// MY CODE 
+		return thread;
+	}
 
-
-
-		return new Object();
+	public boolean isAvailable(){
+		synchronized(this){
+			return totalCooking < machineCapacity; 
+		}
 	}
 
 	// THIS MIGHT BE A USEFUL METHOD TO HAVE AND USE BUT IS JUST ONE IDEA
 	private class CookAnItem implements Runnable {
+		Machines machine; 
+		Food food; 
+
+		public CookAnItem(Machines machine, Food food){
+			this.machine = machine; 
+			this.food = food; 
+		}
+
+
 		public void run() {
+			synchronized (machine) {
+				while (!isAvailable()) {
+					try {
+						// YOUR CODE GOES HERE...
+						machine.wait();
+					} catch (InterruptedException e) {
+					}
+				}
+				Simulation.logEvent(SimulationEvent.machinesCookingFood(machine, food));
+				totalCooking += 1;
+			}
+
 			try {
-				//YOUR CODE GOES HERE...
-				 throw new InterruptedException(); // REMOVE THIS
-			} catch(InterruptedException e) { }
+				Thread.sleep(food.cookTime10S);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			synchronized (machine) {
+				Simulation.logEvent(SimulationEvent.machinesDoneFood(machine, food));
+				totalCooking -= 1;
+				machine.notifyAll();
+			}
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package cmsc433;
+package cmsc433; 
 
 /**
  * We create all food objects used by the simulation in one place, here.
