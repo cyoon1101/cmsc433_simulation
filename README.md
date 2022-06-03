@@ -1,1 +1,1 @@
-# cmsc433_simulation
+# Restaurant simulation
